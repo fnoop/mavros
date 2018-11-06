@@ -5,9 +5,6 @@ services:
 
 language: generic
 
-cache:
-  - apt
-
 env:
   global:
     #- ROS_DISTRO=jade
@@ -40,6 +37,7 @@ env:
 #     "cp -pr $CI_SOURCE_PATH $HOME/catkin_ws/src/mavros",
 #     "docker pull ros:$ROS_DISTRO",
 #     "docker run --rm --name ros -v $HOME/catkin_ws:/catkin_ws -d ros:$ROS_DISTRO",
+#     "docker ps -a",
 # ] + docker_exec(
 #     "apt-get install -qq -y python-pip python-catkin-tools",
 #     "rosdep update",
@@ -62,13 +60,14 @@ before_install:
 - cp -pr $CI_SOURCE_PATH $HOME/catkin_ws/src/mavros
 - docker pull ros:$ROS_DISTRO
 - docker run --rm --name ros -v $HOME/catkin_ws:/catkin_ws -d ros:$ROS_DISTRO
+- docker ps -a
 - docker exec -t ros apt-get install -qq -y python-pip python-catkin-tools
 - docker exec -t ros rosdep update
 install:
 - docker exec -t ros /bin/bash -c 'cd /catkin_ws && catkin config --init --mkdirs'
 - docker exec -t ros /bin/bash -c 'cd /catkin_ws/src && wstool init'
 
-# [[[end]]] (checksum: fc467a1796783d18b243400b5dd79326)
+# [[[end]]] (checksum: 6d0313a3be96872ad17699a5854026c8)
 
 #before_install:
 #  - docker pull ros:$ROS_DISTRO
