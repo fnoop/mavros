@@ -1,16 +1,10 @@
-# Based on https://github.com/felixduvallet/ros-travis-integration
-#
 # vim:set ts=2 sw=2 et:
-dist: trusty
 sudo: required
+services:
+  - docker
+
 language: generic
-compiler:
-  - gcc
-cache:
-  directories:
-    - $HOME/.cache/pip
-  before_cache:
-    - rm -f $HOME/.cache/pip/log/debug.log
+
 cache:
   - apt
 
@@ -20,30 +14,37 @@ env:
     - ROS_CI_DESKTOP="$(lsb_release -cs)"
     - CI_SOURCE_PATH=$(pwd)
     - ROSINSTALL_FILE=$CI_SOURCE_PATH/dependencies.rosinstall
-    - ROS_PARALLEL_JOBS='-j8 -l6'
+    - ROS_PARALLEL_JOBS='-j4 -l2'
 
   matrix:
     - ROS_DISTRO=indigo
-    - ROS_DISTRO=jade
+    - ROS_DISTRO=kinetic
+    - ROS_DISTRO=lunar
+    - ROS_DISTRO=melodic
 
 before_install:
-  - sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $ROS_CI_DESKTOP main\" > /etc/apt/sources.list.d/ros-latest.list"
+  - docker pull ros:$ROS_DISTRO
+  - docker run --rm --name ros -v $CI_SOURCE_PATH:/mavros -d ros:$ROS_DISTRO
+  - docker exec ros "mkdir -p /ws/src && ln -s /mavros /ws/src/"
+  - docker exec ros "rosdep init && rosdep update"
+
+  #- sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $ROS_CI_DESKTOP main\" > /etc/apt/sources.list.d/ros-latest.list"
   #- sudo sh -c "echo \"deb http://packages.ros.org/ros-shadow-fixed/ubuntu $ROS_CI_DESKTOP main\" > /etc/apt/sources.list.d/ros-latest.list"
-  - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+  #- wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
   # Update python 2.7 version
-  - sudo apt-add-repository ppa:deadsnakes/ppa -y
-  - sudo apt-get update -qq
-  - sudo -H apt-get install -qq -y --allow-unauthenticated python2.7-dev libpython2.7-dev libpython2.7 python2.7 libpython2.7-stdlib
-    python-pip python-setuptools python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-catkin python-catkin-tools
+  #- sudo apt-add-repository ppa:deadsnakes/ppa -y
+  #- sudo apt-get update -qq
+  #- sudo -H apt-get install -qq -y --allow-unauthenticated python2.7-dev libpython2.7-dev libpython2.7 python2.7 libpython2.7-stdlib
+  #  python-pip python-setuptools python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-catkin python-catkin-tools
   # Install Python future module
-  - sudo -H pip install -I future -t /usr/lib/python2.7/dist-packages
+  #- sudo -H pip install -I future -t /usr/lib/python2.7/dist-packages
   # Update PYTHONPATH
-  - export PYTHONPATH=$PYTHONPATH:/usr/lib/python2.7/dist-packages
+  #- export PYTHONPATH=$PYTHONPATH:/usr/lib/python2.7/dist-packages
   # Source environment
-  - source /opt/ros/$ROS_DISTRO/setup.bash
+  #- source /opt/ros/$ROS_DISTRO/setup.bash
   # Prepare rosdep
-  - sudo rosdep init
-  - rosdep update
+  #- sudo rosdep init
+  #- rosdep update
 
 install:
   # Create catkin workspace
