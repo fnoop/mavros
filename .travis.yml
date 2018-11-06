@@ -35,12 +35,12 @@ env:
 #
 # commands_com = [
 #     "cd",
-#     "mkdir -p $HOME/ws/src",
-#     "cp -pr $CI_SOURCE_PATH $HOME/ws/src/mavros",
+#     "mkdir -p $HOME/catkin_ws/src",
+#     "cp -pr $CI_SOURCE_PATH $HOME/catkin_ws/src/mavros",
 #     "docker pull ros:$ROS_DISTRO",
-#     "docker run --rm --name ros -v $HOME/ws:/ws -d ros:$ROS_DISTRO",
+#     "docker run --rm --name ros -v $HOME/catkin_ws:/catkin_ws -d ros:$ROS_DISTRO",
 # ] + docker_exec(
-#     "rosdep init",
+#     #"rosdep init", # already done
 #     "rosdep update",
 #     bash=True
 # )
@@ -49,14 +49,13 @@ env:
 # ]]]
 before_install:
 - cd
-- mkdir -p $HOME/ws/src
-- cp -pr $CI_SOURCE_PATH $HOME/ws/src/mavros
+- mkdir -p $HOME/catkin_ws/src
+- cp -pr $CI_SOURCE_PATH $HOME/catkin_ws/src/mavros
 - docker pull ros:$ROS_DISTRO
-- docker run --rm --name ros -v $HOME/ws:/ws -d ros:$ROS_DISTRO
-- docker exec ros /bin/bash -c 'rosdep init'
+- docker run --rm --name ros -v $HOME/catkin_ws:/catkin_ws -d ros:$ROS_DISTRO
 - docker exec ros /bin/bash -c 'rosdep update'
 
-# [[[end]]] (checksum: 452cad56084474a4376cead00c98e610)
+# [[[end]]] (checksum: d583b7d362a2a5b1bd16d61f8eced26f)
 
 #before_install:
 #  - docker pull ros:$ROS_DISTRO
