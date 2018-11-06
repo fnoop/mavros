@@ -41,7 +41,7 @@ env:
 #     "docker pull ros:$ROS_DISTRO",
 #     "docker run --rm --name ros -v $HOME/catkin_ws:/catkin_ws -d ros:$ROS_DISTRO",
 # ] + docker_exec(
-#     "apt install -qq -y python-pip python-catkin-tools",
+#     "apt-get install -qq -y python-pip python-catkin-tools",
 #     "rosdep update",
 # )
 #
@@ -62,13 +62,13 @@ before_install:
 - cp -pr $CI_SOURCE_PATH $HOME/catkin_ws/src/mavros
 - docker pull ros:$ROS_DISTRO
 - docker run --rm --name ros -v $HOME/catkin_ws:/catkin_ws -d ros:$ROS_DISTRO
-- docker exec ros apt install -qq -y python-pip python-catkin-tools
+- docker exec ros apt-get install -qq -y python-pip python-catkin-tools
 - docker exec ros rosdep update
 install:
 - docker exec ros /bin/bash -c 'cd /catkin_ws && catkin config --init --mkdirs'
 - docker exec ros /bin/bash -c 'cd /catkin_ws/src && wstool init'
 
-# [[[end]]] (checksum: 20c8f18836b10103fd00ef4bf1a2c4cf)
+# [[[end]]] (checksum: 5e2174d0ec547c985cd5703d5c2c9935)
 
 #before_install:
 #  - docker pull ros:$ROS_DISTRO
