@@ -17,9 +17,9 @@ env:
     - ROS_PARALLEL_JOBS='-j4 -l2'
 
   matrix:
-    - ROS_DISTRO=indigo
-    - ROS_DISTRO=kinetic
-    - ROS_DISTRO=lunar
+    #- ROS_DISTRO=indigo
+    #- ROS_DISTRO=kinetic
+    #- ROS_DISTRO=lunar
     - ROS_DISTRO=melodic
 
 # [[[cog:
@@ -31,21 +31,30 @@ env:
 #
 # def docker_exec(*args, bash=False):
 #     prefix = bash and '/bin/bash -c ' or ''
-#     return [f"docker exec ros {prefix}{shlex.quote(cmd)}" for cmd in args]
+#     quote = shlex.quote if bash else lambda x: x
+#     return [f"docker exec ros {prefix}{quote(cmd)}" for cmd in args]
 #
-# commands_com = [
+# before_install = [
 #     "cd",
 #     "mkdir -p $HOME/catkin_ws/src",
 #     "cp -pr $CI_SOURCE_PATH $HOME/catkin_ws/src/mavros",
 #     "docker pull ros:$ROS_DISTRO",
 #     "docker run --rm --name ros -v $HOME/catkin_ws:/catkin_ws -d ros:$ROS_DISTRO",
 # ] + docker_exec(
-#     #"rosdep init", # already done
+#     "apt install -qq -y python-pip python-catkin-tools",
 #     "rosdep update",
+# )
+#
+# install = docker_exec(
+#     "cd /catkin_ws && catkin config --init --mkdirs",
+#     "cd /catkin_ws/src && wstool init",
 #     bash=True
 # )
 #
-# yaml_outl(before_install=commands_com)
+# yaml_outl(
+#     before_install=before_install,
+#     install=install,
+# )
 # ]]]
 before_install:
 - cd
@@ -53,9 +62,13 @@ before_install:
 - cp -pr $CI_SOURCE_PATH $HOME/catkin_ws/src/mavros
 - docker pull ros:$ROS_DISTRO
 - docker run --rm --name ros -v $HOME/catkin_ws:/catkin_ws -d ros:$ROS_DISTRO
-- docker exec ros /bin/bash -c 'rosdep update'
+- docker exec ros apt install -qq -y python-pip python-catkin-tools
+- docker exec ros rosdep update
+install:
+- docker exec ros /bin/bash -c 'cd /catkin_ws && catkin config --init --mkdirs'
+- docker exec ros /bin/bash -c 'cd /catkin_ws/src && wstool init'
 
-# [[[end]]] (checksum: d583b7d362a2a5b1bd16d61f8eced26f)
+# [[[end]]] (checksum: 20c8f18836b10103fd00ef4bf1a2c4cf)
 
 #before_install:
 #  - docker pull ros:$ROS_DISTRO
@@ -81,24 +94,24 @@ before_install:
   #- sudo rosdep init
   #- rosdep update
 
-install:
-  # Create catkin workspace
-  - mkdir -p ~/catkin_ws
-  - cd ~/catkin_ws
-  - catkin config --init --mkdirs
-  # Pull source depends
-  - cd src
-  - wstool init
-  - if [[ -f $ROSINSTALL_FILE ]]; then wstool merge $ROSINSTALL_FILE; fi
-  - wstool up
-  # Link the repo we are testing to the new workspace
-  - ln -s $CI_SOURCE_PATH .
-  # Install dependencies using rosdep
-  - cd ~/catkin_ws
-  - rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -q -y
-  # Install GeographicLib datasets (for Ubuntu Trusty - can only download geoid model)
-  - sudo -H mkdir -p /usr/share/geographiclib
-  - sudo -H geographiclib-datasets-download egm96_5
+#install:
+#  # Create catkin workspace
+#  - mkdir -p ~/catkin_ws
+#  - cd ~/catkin_ws
+#  - catkin config --init --mkdirs
+#  # Pull source depends
+#  - cd src
+#  - wstool init
+#  - if [[ -f $ROSINSTALL_FILE ]]; then wstool merge $ROSINSTALL_FILE; fi
+#  - wstool up
+#  # Link the repo we are testing to the new workspace
+#  - ln -s $CI_SOURCE_PATH .
+#  # Install dependencies using rosdep
+#  - cd ~/catkin_ws
+#  - rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -q -y
+#  # Install GeographicLib datasets (for Ubuntu Trusty - can only download geoid model)
+#  - sudo -H mkdir -p /usr/share/geographiclib
+#  - sudo -H geographiclib-datasets-download egm96_5
 
 before_script:
   # Source environment
