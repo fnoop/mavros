@@ -11,7 +11,7 @@ cache:
 env:
   global:
     #- ROS_DISTRO=jade
-    - ROS_CI_DESKTOP="$(lsb_release -cs)"
+    #- ROS_CI_DESKTOP="$(lsb_release -cs)"
     - CI_SOURCE_PATH=$(pwd)
     - ROSINSTALL_FILE=$CI_SOURCE_PATH/dependencies.rosinstall
     - ROS_PARALLEL_JOBS='-j4 -l2'
@@ -34,11 +34,12 @@ env:
 #     return [f"docker exec ros {prefix}{shlex.quote(cmd)}" for cmd in args]
 #
 # commands_com = [
+#     "cd",
+#     "mkdir -p $HOME/ws/src",
+#     "cp -pr $CI_SOURCE_PATH $HOME/ws/src/mavros",
 #     "docker pull ros:$ROS_DISTRO",
-#     "docker run --rm --name ros -v $CI_SOURCE_PATH:/mavros -d ros:$ROS_DISTRO",
+#     "docker run --rm --name ros -v $HOME/ws:/ws -d ros:$ROS_DISTRO",
 # ] + docker_exec(
-#     "mkdir -p /ws/src",
-#     "ln -s /mavros /ws/src/",
 #     "rosdep init",
 #     "rosdep update",
 #     bash=True
@@ -47,14 +48,15 @@ env:
 # yaml_outl(before_install=commands_com)
 # ]]]
 before_install:
+- cd
+- mkdir -p $HOME/ws/src
+- cp -pr $CI_SOURCE_PATH $HOME/ws/src/mavros
 - docker pull ros:$ROS_DISTRO
-- docker run --rm --name ros -v $CI_SOURCE_PATH:/mavros -d ros:$ROS_DISTRO
-- docker exec ros /bin/bash -c 'mkdir -p /ws/src'
-- docker exec ros /bin/bash -c 'ln -s /mavros /ws/src/'
+- docker run --rm --name ros -v $HOME/ws:/ws -d ros:$ROS_DISTRO
 - docker exec ros /bin/bash -c 'rosdep init'
 - docker exec ros /bin/bash -c 'rosdep update'
 
-# [[[end]]] (checksum: bfdb7e94c935acc99b5eefc8b98965a4)
+# [[[end]]] (checksum: 452cad56084474a4376cead00c98e610)
 
 #before_install:
 #  - docker pull ros:$ROS_DISTRO
