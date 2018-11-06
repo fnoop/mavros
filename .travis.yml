@@ -22,11 +22,44 @@ env:
     - ROS_DISTRO=lunar
     - ROS_DISTRO=melodic
 
+# [[[cog:
+# import yaml
+# import shlex
+#
+# def yaml_outl(*args, **kwargs):
+#     cog.outl(yaml.dump(args or kwargs, default_flow_style=False))
+#
+# def docker_exec(*args, bash=False):
+#     prefix = bash and '/bin/bash -c ' or ''
+#     return [f"docker exec ros {prefix}{shlex.quote(cmd)}" for cmd in args]
+#
+# commands_com = [
+#     "docker pull ros:$ROS_DISTRO",
+#     "docker run --rm --name ros -v $CI_SOURCE_PATH:/mavros -d ros:$ROS_DISTRO",
+# ] + docker_exec(
+#     "mkdir -p /ws/src",
+#     "ln -s /mavros /ws/src/",
+#     "rosdep init",
+#     "rosdep update",
+# )
+#
+# yaml_outl(before_install=commands_com)
+# ]]]
 before_install:
-  - docker pull ros:$ROS_DISTRO
-  - docker run --rm --name ros -v $CI_SOURCE_PATH:/mavros -d ros:$ROS_DISTRO
-  - docker exec ros "mkdir -p /ws/src && ln -s /mavros /ws/src/"
-  - docker exec ros "rosdep init && rosdep update"
+- docker pull ros:$ROS_DISTRO
+- docker run --rm --name ros -v $CI_SOURCE_PATH:/mavros -d ros:$ROS_DISTRO
+- docker exec ros 'mkdir -p /ws/src'
+- docker exec ros 'ln -s /mavros /ws/src/'
+- docker exec ros 'rosdep init'
+- docker exec ros 'rosdep update'
+
+# [[[end]]] (checksum: 65582e970a220ba6f6e2ff01f65b0d70)
+
+#before_install:
+#  - docker pull ros:$ROS_DISTRO
+#  - docker run --rm --name ros -v $CI_SOURCE_PATH:/mavros -d ros:$ROS_DISTRO
+#  - docker exec ros "mkdir -p /ws/src && ln -s /mavros /ws/src/"
+#  - docker exec ros "rosdep init && rosdep update"
 
   #- sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $ROS_CI_DESKTOP main\" > /etc/apt/sources.list.d/ros-latest.list"
   #- sudo sh -c "echo \"deb http://packages.ros.org/ros-shadow-fixed/ubuntu $ROS_CI_DESKTOP main\" > /etc/apt/sources.list.d/ros-latest.list"
